@@ -33,7 +33,7 @@ class AbstractCar:
         self.rotation_vel = rotation_vel # Velocidade de rotação
         self.angle = 0 # Ângulo
         self.x, self.y = self.start_pos
-        self.acceleration = 0.2 # Aceleração
+        self.acceleration = 0.15 # Aceleração
 
     def rotate(self, left=False, right=False): # Rotaciona o carro
         if left:
@@ -52,6 +52,12 @@ class AbstractCar:
         self.vel = min(self.vel + self.acceleration, self.max_vel)
         self.move()
 
+    def move_backward(self):
+        # Diminui a velocidade pela a aceleração, até que a velocidade fique negativa
+        # e seja igual a metade da velocidade máxima positiva.
+        self.vel = max(self.vel - self.acceleration, -self.max_vel/2)
+        self.move()
+
     # Função para mover o carro
     def move(self):
         radians = math.radians(self.angle) # Converte o ângulo em graus para radianos
@@ -63,17 +69,17 @@ class AbstractCar:
         self.y -= vertical # Move o carro verticalmente
         self.x -= horizontal # Move o carro horizontalmente
 
-    # Função para desacelerar o carro
-    def reduce_speed(self):
-        # Desacelera o carro pela metade da aceleração, até que a velocidade seja 0
-        self.vel = max(self.vel - self.acceleration / 1.5, 0)
-        self.move() # Continua movendo o carro ao desacelerar
-
 
 # Classe filha para o carro do player
 class PlayerCar(AbstractCar):
     image = red_car
     start_pos = (160, 200)
+
+    # Função para desacelerar o carro
+    def reduce_speed(self):
+        # Desacelera o carro pela metade da aceleração, até que a velocidade seja 0
+        self.vel = max(self.vel - self.acceleration / 1.5, 0)
+        self.move() # Continua movendo o carro ao desacelerar
 
 
 # Função para renderizar as imagens
@@ -84,14 +90,34 @@ def render(window, images, player_car):
     player_car.render(window)
     pygame.display.update() # Atualiza a tela
 
+def move_player(player_car):
+    keys = pygame.key.get_pressed() # Se uma tecla for pressionada
+    moved = False
+
+    # Se a tecla A for pressionada o carro rotaciona para a esquerda
+    if keys[pygame.K_a]:
+        player_car.rotate(left=True)
+    # Se a tecla D for pressionada o carro rotaciona para a direita
+    if keys[pygame.K_d]:
+        player_car.rotate(right=True)
+    if keys[pygame.K_w]:
+        moved = True
+        player_car.move_forward()
+    if keys[pygame.K_s]:
+        moved = True
+        player_car.move_backward()
+
+    if not moved:
+        player_car.reduce_speed()
+
 
 fps = 60
 run = True # Mantém o jogo ativo
 clock = pygame.time.Clock()
 # Lista de imagens e suas posições de renderização
 images = [(grass, (0, 0)), (track, (0, 0))]
-# Carro do jogador com velocidade 5 e velocidade de rotação 5
-player_car = PlayerCar(5, 5)
+# Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
+player_car = PlayerCar(5, 4)
 
 
 # Game Loop
@@ -106,21 +132,6 @@ while run:
             run = False
             break
 
-    keys = pygame.key.get_pressed() # Se uma tecla for pressionada
-    moved = False
-
-    # Se a tecla A for pressionada o carro rotaciona para a esquerda
-    if keys[pygame.K_a]:
-        player_car.rotate(left=True)
-    # Se a tecla D for pressionada o carro rotaciona para a direita
-    if keys[pygame.K_d]:
-        player_car.rotate(right=True)
-    if keys[pygame.K_w]:
-        moved = True
-        player_car.move_forward()
-
-    if not moved:
-        player_car.reduce_speed()
-
+    move_player(player_car)
     
 pygame.quit()
