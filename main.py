@@ -13,7 +13,10 @@ track = scale_image(pygame.image.load('imgs/track.png'), 0.8)
 
 track_border = scale_image(pygame.image.load('imgs/track-border.png'), 0.8)
 track_border_mask = pygame.mask.from_surface(track_border) # Máscara de colisão do circuito
+
 finish = pygame.image.load('imgs/finish.png')
+finish_mask = pygame.mask.from_surface(finish)
+finish_position = (110, 250)
 
 red_car = scale_image(pygame.image.load('imgs/red-car.png'), 1.5)
 green_car = scale_image(pygame.image.load('imgs/green-car.png'), 0.55)
@@ -78,6 +81,12 @@ class AbstractCar:
         # Ponto de interseção
         poi = mask.overlap(car_mask, offset)
         return poi
+    
+    # Função para reiniciar o carro na posição inicial
+    def reset(self):
+        self.x, self.y = self.start_pos
+        self.angle = 0
+        self.vel = 0
 
 
 # Classe filha para o carro do player
@@ -134,9 +143,9 @@ fps = 60
 run = True # Mantém o jogo ativo
 clock = pygame.time.Clock()
 # Lista de imagens e suas posições de renderização
-images = [(grass, (0, 0)), (track, (0, 0))]
+images = [(grass, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0))]
 # Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
-player_car = PlayerCar(4, 5)
+player_car = PlayerCar(4, 4)
 
 
 # Game Loop
@@ -154,7 +163,15 @@ while run:
     move_player(player_car)
 
     # Verifica se o carro colidiu
-    if player_car.collide(track_border_mask):
+    if player_car.collide(track_border_mask) != None:
         player_car.bounce()
-    
+
+    finish_poi_collide = player_car.collide(finish_mask, *finish_position)
+    if finish_poi_collide != None: # * Divide em 2 argumentos (x e y)
+        if finish_poi_collide[1] == 0: # Se o carro colidir com a parte de cima da linha de chegada
+            player_car.bounce()
+        else:
+            player_car.reset()
+            print('Finish')
+
 pygame.quit()
