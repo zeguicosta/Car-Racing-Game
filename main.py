@@ -7,18 +7,28 @@ from utils import scale_image, blit_rotate_center
 # ARQUIVO PRINCIPAL
 
 
-# Carregando as imagens
-grass = scale_image(pygame.image.load('imgs/grass.jpg'), 2.5)
-track = scale_image(pygame.image.load('imgs/track.png'), 0.8)
+# Música
+# pygame.mixer.init() # Iniciando o mixer
+# pygame.mixer.music.load('sound/soundtrack.mp3')
+# pygame.mixer.music.play(-1) # Executa a música infinitamente
 
-track_border = scale_image(pygame.image.load('imgs/track-border.png'), 0.8)
+# Som
+# sound = pygame.mixer.Sound('sound/carsound.mp3')
+# sound.play(-1)
+# sound.set_volume(0.3)
+
+# Carregando as imagens
+grass = scale_image(pygame.image.load('imgs/bg.png'), 7)
+track = scale_image(pygame.image.load('imgs/track2.png'), 7)
+
+track_border = scale_image(pygame.image.load('imgs/border2.png'), 7)
 track_border_mask = pygame.mask.from_surface(track_border) # Máscara de colisão do circuito
 
-finish = pygame.image.load('imgs/finish.png')
+finish = scale_image(pygame.image.load('imgs/finish2.png'), 7)
 finish_mask = pygame.mask.from_surface(finish)
-finish_position = (110, 250)
+finish_position = (259, 350)
 
-red_car = scale_image(pygame.image.load('imgs/red-car.png'), 1.5)
+red_car = scale_image(pygame.image.load('imgs/racecar.png'), 1.7)
 green_car = scale_image(pygame.image.load('imgs/green-car.png'), 0.55)
 
 
@@ -92,7 +102,7 @@ class AbstractCar:
 # Classe filha para o carro do player
 class PlayerCar(AbstractCar):
     image = red_car
-    start_pos = (160, 200)
+    start_pos = (288, 175)
 
     # Função para desacelerar o carro
     def reduce_speed(self):
@@ -102,7 +112,7 @@ class PlayerCar(AbstractCar):
 
     # Função para rebater o carro ao colidir
     def bounce(self):
-        self.vel = -self.vel # Inverte a direção da velocidade
+        self.vel = -self.vel / 2 # Inverte a direção da velocidade
         self.move() # Move o carro assim que inverte a velocidade
 
 
@@ -145,8 +155,7 @@ clock = pygame.time.Clock()
 # Lista de imagens e suas posições de renderização
 images = [(grass, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0))]
 # Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
-player_car = PlayerCar(4, 4)
-
+player_car = PlayerCar(9, 5)
 
 # Game Loop
 while run:
