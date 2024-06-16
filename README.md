@@ -53,15 +53,17 @@ Complete o maior número de voltas no menor tempo possível. O tempo de cada vol
 
 ## Estrutura do Projeto
 
-`├── imgs/
- │   ├── bg.png 
- │   ├── track2.png 
- │   ├── border2.png 
- │   ├── finish2.png 
- │   ├── racecar.png 
- │   └── green-car.png 
- ├── utils.py 
- └── main.py`
+```
+├── imgs/
+│   ├── bg.png 
+│   ├── track2.png 
+│   ├── border2.png 
+│   ├── finish2.png 
+│   ├── racecar.png 
+│   └── green-car.png 
+├── utils.py 
+└── main.py
+```
 
 ## Detalhes Técnicos
 
@@ -87,4 +89,4 @@ Arquivo utilitário contendo funções auxiliares para manipulação de imagens 
 
 ## Informações Adicionais
 
-O projeto é um jogo simples que permite ao jogador controlar um carro em uma pista de corrida, registrando o tempo de cada volta. É uma ótima oportunidade para praticar Python e Pygame, além de entender conceitos básicos de desenvolvimento de jogos.
+O projeto até agora é um jogo simples que permite ao jogador controlar um carro em uma pista de corrida, registrando o tempo de cada volta. O jogo ainda se apresenta na fase inicial, não possuindo todas as funcionalidades finais, como competição com bots, multiplayer e habilidades como Attack Mode, refletindo a competição da Fórmula E. É uma ótima oportunidade para aprender as regras e conceitos da Fórmula E, de uma maneira fluída e intuitiva.
