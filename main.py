@@ -7,16 +7,6 @@ from utils import scale_image, blit_rotate_center
 # ARQUIVO PRINCIPAL
 
 
-# Música
-# pygame.mixer.init() # Iniciando o mixer
-# pygame.mixer.music.load('sound/soundtrack.mp3')
-# pygame.mixer.music.play(-1) # Executa a música infinitamente
-
-# Som
-# sound = pygame.mixer.Sound('sound/carsound.mp3')
-# sound.play(-1)
-# sound.set_volume(0.3)
-
 # Carregando as imagens
 grass = scale_image(pygame.image.load('imgs/bg.png'), 7)
 track = scale_image(pygame.image.load('imgs/track2.png'), 7)
@@ -156,9 +146,16 @@ clock = pygame.time.Clock()
 images = [(grass, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0))]
 # Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
 player_car = PlayerCar(9, 5)
+nickname = input('Digite seu nome: ')
+print()
+print(f'------- Piloto {nickname} -------')
+timer = 0 # Tempo da volta
+lap = 1 # Número da volta
+laps = [] # Lista com timer de cada volta
 
 # Game Loop
 while run:
+    timer += 1 # Acrecenta um no timer
     clock.tick(fps) # Faz com que o jogo mantenha 60 quadros for segundo
 
     render(window, images, player_car)
@@ -181,6 +178,12 @@ while run:
             player_car.bounce()
         else:
             player_car.reset()
-            print('Finish')
+            print(f'Volta {lap}: {(timer / 60) + 2:.2f}s')
+            laps.append((timer / 60) + 2) # Adiciona o tempo da volta na lista
+            timer = 0 # Redefine o tempo da volta para 0
+            lap += 1 # Adiciona mais uma volta
 
-pygame.quit()
+best_lap = min(laps) # Determina o menor tempo
+print()
+print(f'- Melhor volta: {best_lap:.2f} segundos!')
+pygame.quit() # Encerra o jogo
