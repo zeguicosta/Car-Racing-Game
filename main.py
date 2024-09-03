@@ -4,20 +4,14 @@ import math
 from utils import scale_image, blit_rotate_center
 
 
-# ARQUIVO PRINCIPAL
-
-
 # Carregando as imagens
 grass = scale_image(pygame.image.load('imgs/bg.png'), 7)
 track = scale_image(pygame.image.load('imgs/track2.png'), 7)
-
 track_border = scale_image(pygame.image.load('imgs/border2.png'), 7)
 track_border_mask = pygame.mask.from_surface(track_border) # Máscara de colisão do circuito
-
 finish = scale_image(pygame.image.load('imgs/finish2.png'), 7)
 finish_mask = pygame.mask.from_surface(finish)
 finish_position = (259, 350)
-
 red_car = scale_image(pygame.image.load('imgs/racecar.png'), 1.7)
 green_car = scale_image(pygame.image.load('imgs/green-car.png'), 0.55)
 
@@ -138,52 +132,56 @@ def move_player(player_car):
     if not moved:
         player_car.reduce_speed()
 
+def main():
+    fps = 60
+    run = True # Mantém o jogo ativo
+    clock = pygame.time.Clock()
+    # Lista de imagens e suas posições de renderização
+    images = [(grass, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0))]
+    # Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
+    player_car = PlayerCar(9, 5)
+    nickname = input('Digite seu nome: ')
+    print()
+    print(f'------- Piloto {nickname} -------')
+    timer = 0 # Tempo da volta
+    lap = 1 # Número da volta
+    laps = [] # Lista com timer de cada volta
 
-fps = 60
-run = True # Mantém o jogo ativo
-clock = pygame.time.Clock()
-# Lista de imagens e suas posições de renderização
-images = [(grass, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0))]
-# Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
-player_car = PlayerCar(9, 5)
-nickname = input('Digite seu nome: ')
-print()
-print(f'------- Piloto {nickname} -------')
-timer = 0 # Tempo da volta
-lap = 1 # Número da volta
-laps = [] # Lista com timer de cada volta
 
-# Game Loop
-while run:
-    timer += 1 # Acrecenta um no timer
-    clock.tick(fps) # Faz com que o jogo mantenha 60 quadros for segundo
+    # Game Loop
+    while run:
+        timer += 1 # Acrecenta um no timer
+        clock.tick(fps) # Faz com que o jogo mantenha 60 quadros for segundo
 
-    render(window, images, player_car)
+        render(window, images, player_car)
 
-    # Verifica os eventos
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: # Encerra o Game Loop ao fechar a janela
-            run = False
-            break
+        # Verifica os eventos
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: # Encerra o Game Loop ao fechar a janela
+                run = False
+                break
 
-    move_player(player_car)
+        move_player(player_car)
 
-    # Verifica se o carro colidiu
-    if player_car.collide(track_border_mask) != None:
-        player_car.bounce()
-
-    finish_poi_collide = player_car.collide(finish_mask, *finish_position)
-    if finish_poi_collide != None: # * Divide em 2 argumentos (x e y)
-        if finish_poi_collide[1] == 0: # Se o carro colidir com a parte de cima da linha de chegada
+        # Verifica se o carro colidiu
+        if player_car.collide(track_border_mask) != None:
             player_car.bounce()
-        else:
-            player_car.reset()
-            print(f'Volta {lap}: {(timer / 60) + 2:.2f}s')
-            laps.append((timer / 60) + 2) # Adiciona o tempo da volta na lista
-            timer = 0 # Redefine o tempo da volta para 0
-            lap += 1 # Adiciona mais uma volta
 
-best_lap = min(laps) # Determina o menor tempo
-print()
-print(f'- Melhor volta: {best_lap:.2f} segundos!')
-pygame.quit() # Encerra o jogo
+        finish_poi_collide = player_car.collide(finish_mask, *finish_position)
+        if finish_poi_collide != None: # * Divide em 2 argumentos (x e y)
+            if finish_poi_collide[1] == 0: # Se o carro colidir com a parte de cima da linha de chegada
+                player_car.bounce()
+            else:
+                player_car.reset()
+                print(f'Volta {lap}: {(timer / 60) + 2:.2f}s')
+                laps.append((timer / 60) + 2) # Adiciona o tempo da volta na lista
+                timer = 0 # Redefine o tempo da volta para 0
+                lap += 1 # Adiciona mais uma volta
+
+    best_lap = min(laps) # Determina o menor tempo
+    print()
+    print(f'- Melhor volta: {best_lap:.2f} segundos!')
+    pygame.quit() # Encerra o jogo
+
+if __name__ == '__main__':
+    main()
