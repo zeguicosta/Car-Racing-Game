@@ -17,6 +17,7 @@ finish_position = (259, 350)
 red_car = scale_image(pygame.image.load('imgs/racecar.png'), 1.7)
 green_car = scale_image(pygame.image.load('imgs/green-car.png'), 0.55)
 init_screen = scale_image(pygame.image.load('imgs/start_screen.png'), 7)
+game_over = scale_image(pygame.image.load('imgs/gameover.png'), 7)
 
 # Cores
 white = (255, 255, 255)
@@ -264,8 +265,8 @@ def main(player_name):
     timer = 0 # Tempo da volta
     lap = 1 # Número da volta
     laps = [] # Lista com timer de cada volta
-    full_life = scale_image(pygame.image.load('imgs/bolt.png'), 7)
 
+    full_life = scale_image(pygame.image.load('imgs/bolt.png'), 7)
     current_life = full_life
 
     # Game Loop
@@ -315,10 +316,15 @@ def main(player_name):
             if lap > 2:  # Se o jogador completar 3 voltas
                         run = False  # Interrompe o jogo
 
-    # Exibe as informações na tela após o jogo ser interrompido
-    window.fill(black)
-    render_info(window, player_name, laps, commom_font)
-    pygame.display.update()
+    if lap > 2:
+        # Exibe as informações na tela após o jogo ser interrompido
+        window.fill(black)
+        render_info(window, player_name, laps, commom_font)
+        pygame.display.update()
+    else:
+        window.fill(black)
+        window.blit(game_over, (0, 0))
+        pygame.display.update()
 
      # Espera até o jogador fechar a janela
     while True:
