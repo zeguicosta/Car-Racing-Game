@@ -17,7 +17,6 @@ finish_position = (259, 350)
 red_car = scale_image(pygame.image.load('imgs/racecar.png'), 1.7)
 green_car = scale_image(pygame.image.load('imgs/green-car.png'), 0.55)
 init_screen = scale_image(pygame.image.load('imgs/start_screen.png'), 7)
-life = scale_image(pygame.image.load('imgs/bolt.png'), 7)
 
 # Cores
 white = (255, 255, 255)
@@ -257,13 +256,17 @@ def main(player_name):
     run = True # Mantém o jogo ativo
     clock = pygame.time.Clock()
     # Lista de imagens e suas posições de renderização
-    images = [(background, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0)), (life, (0, 0))]
+    images = [(background, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0))]
     # Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
     player_car = PlayerCar(9, 5)
     print(f'------- Piloto {player_name} -------')
+    lives = 5
     timer = 0 # Tempo da volta
     lap = 1 # Número da volta
     laps = [] # Lista com timer de cada volta
+    full_life = scale_image(pygame.image.load('imgs/bolt.png'), 7)
+
+    current_life = full_life
 
     # Game Loop
     while run:
@@ -271,6 +274,8 @@ def main(player_name):
         clock.tick(fps) # Faz com que o jogo mantenha 60 quadros for segundo
 
         render(window, images, player_car)
+        window.blit(current_life, (0, 0))
+        pygame.display.update()
 
         # Verifica os eventos
         for event in pygame.event.get():
@@ -283,6 +288,19 @@ def main(player_name):
         # Verifica se o carro colidiu
         if player_car.collide(track_border_mask) != None:
             player_car.bounce()
+            lives -= 1
+
+        match lives:
+            case 4:
+                current_life = scale_image(pygame.image.load('imgs/bolt2.png'), 7)
+            case 3:
+                current_life = scale_image(pygame.image.load('imgs/bolt3.png'), 7)
+            case 2:
+                current_life = scale_image(pygame.image.load('imgs/bolt4.png'), 7)
+            case 1:
+                current_life = scale_image(pygame.image.load('imgs/bolt5.png'), 7)
+            case 0:
+                run = False
 
         finish_poi_collide = player_car.collide(finish_mask, *finish_position)
         if finish_poi_collide != None: # * Divide em 2 argumentos (x e y)
