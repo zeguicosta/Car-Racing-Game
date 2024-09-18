@@ -1,25 +1,40 @@
 import pygame
+import sys
 import time
 import math
 from utils import scale_image, blit_rotate_center
 
+pygame.init()
 
 # Carregando as imagens
-grass = scale_image(pygame.image.load('imgs/bg.png'), 7)
+background = scale_image(pygame.image.load('imgs/bg.png'), 7)
 track = scale_image(pygame.image.load('imgs/track2.png'), 7)
-track_border = scale_image(pygame.image.load('imgs/border2.png'), 7)
+track_border = scale_image(pygame.image.load('imgs/border.png'), 7)
 track_border_mask = pygame.mask.from_surface(track_border) # Máscara de colisão do circuito
 finish = scale_image(pygame.image.load('imgs/finish2.png'), 7)
 finish_mask = pygame.mask.from_surface(finish)
 finish_position = (259, 350)
 red_car = scale_image(pygame.image.load('imgs/racecar.png'), 1.7)
 green_car = scale_image(pygame.image.load('imgs/green-car.png'), 0.55)
+init_screen = scale_image(pygame.image.load('imgs/start_screen.png'), 7)
+life = scale_image(pygame.image.load('imgs/bolt.png'), 7)
 
+# Cores
+white = (255, 255, 255)
+black = (0, 0, 0)
+
+# Fontes
+title_font = pygame.font.Font('fonts/PixelifySans-Bold.ttf', 120)
+commom_font = pygame.font.Font('fonts/PixelifySans-Medium.ttf', 65)
 
 # Criando a janela do jogo
 width, height = track.get_width(), track.get_height() # Pegando o tamanho do circuito
 window = pygame.display.set_mode((width, height)) # Tornando a janela do tamanho do cirtuito
 pygame.display.set_caption('FORMULA E SIMULATOR') # Título do jogo
+
+
+
+
 
 
 # Classe pai dos carros
@@ -83,6 +98,12 @@ class AbstractCar:
         self.vel = 0
 
 
+
+
+
+
+
+
 # Classe filha para o carro do player
 class PlayerCar(AbstractCar):
     image = red_car
@@ -100,6 +121,12 @@ class PlayerCar(AbstractCar):
         self.move() # Move o carro assim que inverte a velocidade
 
 
+
+
+
+
+
+
 # Função para renderizar as imagens
 def render(window, images, player_car):
     for img, pos in images:
@@ -107,6 +134,7 @@ def render(window, images, player_car):
 
     player_car.render(window)
     pygame.display.update() # Atualiza a tela
+
 
 # Função para mover o carro do player
 def move_player(player_car):
@@ -132,21 +160,110 @@ def move_player(player_car):
     if not moved:
         player_car.reduce_speed()
 
-def main():
+
+
+
+
+
+
+
+
+# Tela Inicial
+
+# Função que renderiza o texto
+def render_text(surface, text, font, color, y_offset):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(center = (width/2, height/2 + y_offset))
+    surface.blit(text_surface, text_rect)
+
+# Função que renderiza a tela inicial
+def start_screen():
+    while True:
+        window.blit(init_screen, (0, 0))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_i:
+                    return
+                if event.key == pygame.K_s:
+                    pygame.quit()
+                    sys.exit()
+
+
+# Função para obter o nome do jogador
+def get_player_name():
+    player_name = ""
+    active = True
+
+    while active:
+        window.fill(black)
+        
+        render_text(window, "Digite seu nome:", title_font, white, -100)
+        name_surface = commom_font.render(player_name, True, white)
+        name_rect = name_surface.get_rect(center = (width / 2, height / 2))
+        window.blit(name_surface, name_rect)
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    active = False
+                elif event.key == pygame.K_BACKSPACE:
+                    player_name = player_name[:-1]  # Remove o último caractere
+                else:
+                    player_name += event.unicode  # Adiciona o caractere digitado
+
+    return player_name
+
+
+
+
+
+
+
+# Tela final
+
+# Função que exibe as informações da volta
+def render_info(surface, player_name, laps, font):
+    render_text(surface, f'Piloto: {player_name}', font, white, -300)
+    if laps:
+        for i, lap_time in enumerate(laps, start=1):
+            render_text(surface, f'Volta {i}: {lap_time:.2f}s', font, white, (-70 * i))
+    
+    best_lap = min(laps)
+    render_text(surface, f'Melhor Volta: {best_lap:.2f}s', font, white, (70 * (len(laps) + 1)))
+    
+
+
+
+
+
+
+
+# Jogo
+
+# Função que faz o jogo rodar
+def main(player_name):
     fps = 60
     run = True # Mantém o jogo ativo
     clock = pygame.time.Clock()
     # Lista de imagens e suas posições de renderização
-    images = [(grass, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0))]
+    images = [(background, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0)), (life, (0, 0))]
     # Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
     player_car = PlayerCar(9, 5)
-    nickname = input('Digite seu nome: ')
-    print()
-    print(f'------- Piloto {nickname} -------')
+    print(f'------- Piloto {player_name} -------')
     timer = 0 # Tempo da volta
     lap = 1 # Número da volta
     laps = [] # Lista com timer de cada volta
-
 
     # Game Loop
     while run:
@@ -173,15 +290,26 @@ def main():
                 player_car.bounce()
             else:
                 player_car.reset()
-                print(f'Volta {lap}: {(timer / 60) + 2:.2f}s')
                 laps.append((timer / 60) + 2) # Adiciona o tempo da volta na lista
                 timer = 0 # Redefine o tempo da volta para 0
                 lap += 1 # Adiciona mais uma volta
 
-    best_lap = min(laps) # Determina o menor tempo
-    print()
-    print(f'- Melhor volta: {best_lap:.2f} segundos!')
-    pygame.quit() # Encerra o jogo
+            if lap > 2:  # Se o jogador completar 3 voltas
+                        run = False  # Interrompe o jogo
+
+    # Exibe as informações na tela após o jogo ser interrompido
+    window.fill(black)
+    render_info(window, player_name, laps, commom_font)
+    pygame.display.update()
+
+     # Espera até o jogador fechar a janela
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
 
 if __name__ == '__main__':
-    main()
+    start_screen()
+    main(get_player_name())
