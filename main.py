@@ -14,10 +14,12 @@ track_border_mask = pygame.mask.from_surface(track_border) # Máscara de colisã
 finish = scale_image(pygame.image.load('imgs/finish2.png'), 7)
 finish_mask = pygame.mask.from_surface(finish)
 finish_position = (259, 350)
-red_car = scale_image(pygame.image.load('imgs/racecar.png'), 1.7)
+red_car = scale_image(pygame.image.load('imgs/bluecar.png'), 1.7)
 green_car = scale_image(pygame.image.load('imgs/green-car.png'), 0.55)
 init_screen = scale_image(pygame.image.load('imgs/start_screen.png'), 7)
 game_over = scale_image(pygame.image.load('imgs/gameover.png'), 7)
+dash = scale_image(pygame.image.load('imgs/dash.png'), 7)
+dash_mask = pygame.mask.from_surface(dash) # Máscara de colisão do dash
 
 # Cores
 white = (255, 255, 255)
@@ -46,7 +48,7 @@ class AbstractCar:
         self.rotation_vel = rotation_vel # Velocidade de rotação
         self.angle = 0 # Ângulo
         self.x, self.y = self.start_pos
-        self.acceleration = 0.15 # Aceleração
+        self.acceleration = 0.2 # Aceleração
 
     def rotate(self, left=False, right=False): # Rotaciona o carro
         if left:
@@ -176,6 +178,7 @@ def render_text(surface, text, font, color, y_offset):
     text_rect = text_surface.get_rect(center = (width/2, height/2 + y_offset))
     surface.blit(text_surface, text_rect)
 
+
 # Função que renderiza a tela inicial
 def start_screen():
     while True:
@@ -257,14 +260,17 @@ def main(player_name):
     run = True # Mantém o jogo ativo
     clock = pygame.time.Clock()
     # Lista de imagens e suas posições de renderização
-    images = [(background, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0))]
+    images = [(background, (0, 0)), (track, (0, 0)), (finish, finish_position), (track_border, (0, 0)), (dash, (0, 0))]
     # Carro do jogador com velocidade máxima 5 e velocidade de rotação 5
-    player_car = PlayerCar(9, 5)
+    player_car = PlayerCar(11, 7)
     print(f'------- Piloto {player_name} -------')
     lives = 5
     timer = 0 # Tempo da volta
     lap = 1 # Número da volta
     laps = [] # Lista com timer de cada volta
+    dash_active = False
+    dash_timer = 0
+    dash_duration = 60 # Duração do dash (1 segundo, considerando 60 fps)
 
     full_life = scale_image(pygame.image.load('imgs/bolt.png'), 7)
     current_life = full_life
@@ -276,7 +282,18 @@ def main(player_name):
 
         render(window, images, player_car)
         window.blit(current_life, (0, 0))
-        pygame.display.update()
+
+        # Verifica se o efeito do dash está ativo e controla o tempo
+        if dash_active:
+            dash_timer += 1
+            overlay = pygame.Surface((width, height))  # Cria uma superfície do tamanho da tela
+            overlay.set_alpha(20)  # Define a transparência (0 a 255)
+            overlay.fill((255, 28, 174))  # Preenche a superfície com a cor azul
+            window.blit(overlay, (0, 0))  # Desenha a superfície azul por cima da tela
+            if dash_timer >= dash_duration:
+                dash_active = False
+                player_car.max_vel = 11  # Retorna a velocidade original
+                player_car.acceleration = 0.2 # Retorna a aceleração original
 
         # Verifica os eventos
         for event in pygame.event.get():
@@ -285,6 +302,13 @@ def main(player_name):
                 break
 
         move_player(player_car)
+
+        if not dash_active and player_car.collide(dash_mask) != None:
+            dash_active = True
+            dash_timer = 0
+            player_car.acceleration = 1
+            player_car.max_vel = 15
+        
 
         # Verifica se o carro colidiu
         if player_car.collide(track_border_mask) != None:
@@ -315,6 +339,8 @@ def main(player_name):
 
             if lap > 2:  # Se o jogador completar 3 voltas
                         run = False  # Interrompe o jogo
+
+        pygame.display.update()
 
     if lap > 2:
         # Exibe as informações na tela após o jogo ser interrompido
