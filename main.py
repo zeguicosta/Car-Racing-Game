@@ -29,6 +29,10 @@ black = (0, 0, 0)
 title_font = pygame.font.Font('fonts/PixelifySans-Bold.ttf', 120)
 commom_font = pygame.font.Font('fonts/PixelifySans-Medium.ttf', 65)
 
+# Música
+pygame.mixer.music.load('sound/soundtrack.mp3')
+pygame.mixer.music.play(-1) # Executa a música infinitamente
+
 # Criando a janela do jogo
 width, height = track.get_width(), track.get_height() # Pegando o tamanho do circuito
 window = pygame.display.set_mode((width, height)) # Tornando a janela do tamanho do cirtuito
