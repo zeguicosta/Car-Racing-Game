@@ -17,16 +17,31 @@ def load_images():
     images['track_border'] = scale_image(pygame.image.load('imgs/border.png'), 7)
     images['finish'] = scale_image(pygame.image.load('imgs/finish2.png'), 7)
     images['red_car'] = scale_image(pygame.image.load('imgs/bluecar.png'), 1.7)
-    images['init_screen'] = scale_image(pygame.image.load('imgs/start_screen.png'), 7)
-    images['game_over'] = scale_image(pygame.image.load('imgs/gameover.png'), 7)
+    # images['init_screen'] = scale_image(pygame.image.load('imgs/start_screen.png'), 7)
+    # images['game_over'] = scale_image(pygame.image.load('imgs/gameover.png'), 7)
     images['dash'] = scale_image(pygame.image.load('imgs/dash.png'), 7)
-    images['life'] = [
-        scale_image(pygame.image.load('imgs/bolt1.png'), 7),
-        scale_image(pygame.image.load('imgs/bolt2.png'), 7),
-        scale_image(pygame.image.load('imgs/bolt3.png'), 7),
-        scale_image(pygame.image.load('imgs/bolt4.png'), 7),
-        scale_image(pygame.image.load('imgs/bolt5.png'), 7)
-    ]
+    images['life'] = [scale_image(pygame.image.load(f'imgs/bolt{i}.png'), 7) for i in range(1, 6)]
+
+    animation_frames = []
+    for i in range(1, 15):
+        frame_path = f'imgs/start_animation{i}.png'
+        try:
+            frame_image = scale_image(pygame.image.load(frame_path), 7)
+            animation_frames.append(frame_image)
+        except pygame.error as e:
+            print(f'Erro ao carregar {frame_path}: {e}')
+    images['start_animation'] = animation_frames
+
+    gameover_frames = []
+    for i in range(1, 6):
+        gameover_path = f'imgs/gameover{i}.png'
+        try:
+            gameover_image = scale_image(pygame.image.load(gameover_path), 7)
+            gameover_frames.append(gameover_image)
+        except pygame.error as e:
+            print(f'Erro ao carregar {gameover_path}: {e}')
+    images['gameover_animation'] = gameover_frames
+
     return images
 
 class Game:
@@ -59,6 +74,19 @@ class Game:
         self.finish_mask = pygame.mask.from_surface(self.images['finish'])
         self.dash_mask = pygame.mask.from_surface(self.images['dash'])
 
+        # Variáveis da animação da tela inicial
+        self.animation_frames = self.images['start_animation']
+        self.current_animation_frame = 0
+        self.animation_speed = 5 # Número de frames do jogo por mudança de frame da animação
+        self.animation_counter = 0
+
+        # Variáveis de animação de game over
+        self.gameover_frames = self.images['gameover_animation']
+        self.current_gameover_frame = 0
+        self.gameover_speed = 7  # Número de frames do jogo por mudança de frame da animação de game over
+        self.gameover_counter = 0
+
+
     def init_music(self):
         pygame.mixer.music.load('sound/soundtrack.mp3')
         pygame.mixer.music.play(-1)
@@ -81,12 +109,14 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+
             elif event.type == pygame.KEYDOWN:
                 if self.state == 'START':
                     if event.key == pygame.K_i:
                         self.state = 'GET_NAME'
                     elif event.key == pygame.K_s:
                         self.running = False
+
                 elif self.state == 'GET_NAME':
                     if event.key == pygame.K_RETURN and self.player_name.strip():
                         self.state = 'PLAYING'
@@ -94,6 +124,7 @@ class Game:
                         self.player_name = self.player_name[:-1]
                     else:
                         self.player_name += event.unicode
+
                 elif self.state in ['GAME_OVER', 'FINISHED']:
                     if event.key == pygame.K_q:
                         self.running = False
@@ -147,15 +178,33 @@ class Game:
                     if self.lap > self.max_laps:
                         self.state = 'FINISHED'
 
+        elif self.state == 'START':
+            # Atualizar a animação da tela inicial
+            self.animation_counter += 1
+            if self.animation_counter >= self.animation_speed:
+                self.animation_counter = 0
+                self.current_animation_frame += 1
+                if self.current_animation_frame >= len(self.animation_frames):
+                    self.current_animation_frame = 0  # Reinicia a animação (loop)
+
+        elif self.state == 'GAME_OVER':
+            # Atualizar a animação de game over
+            self.gameover_counter += 1
+            if self.gameover_counter >= self.gameover_speed:
+                self.gameover_counter = 0
+                self.current_gameover_frame += 1
+                if self.current_gameover_frame >= len(self.gameover_frames):
+                    self.current_gameover_frame = 0  # Reinicia a animação (loop)
+
     def render(self):
         if self.state == 'START':
-            self.window.blit(self.images['init_screen'], (0, 0))
+            self.window.blit(self.animation_frames[self.current_animation_frame], (0, 0))
 
         elif self.state == 'GET_NAME':
             self.window.fill(BLACK)
             self.render_text("Digite seu nome:", 'title', WHITE, -100)
             name_surface = self.fonts['common'].render(self.player_name, True, WHITE)
-            name_rect = name_surface.get_rect(center=(self.width / 2, self.height / 2))
+            name_rect = name_surface.get_rect(center = (self.width / 2, self.height / 2))
             self.window.blit(name_surface, name_rect)
 
         elif self.state == 'PLAYING':
@@ -174,7 +223,9 @@ class Game:
                 self.window.blit(overlay, (0, 0))
 
         elif self.state == 'GAME_OVER':
-            self.window.blit(self.images['game_over'], (0, 0))
+            # Exibir o frame atual da animação de game over
+            if self.gameover_frames:  # Verifica se a lista não está vazia
+                self.window.blit(self.gameover_frames[self.current_gameover_frame], (0, 0))
 
         elif self.state == 'FINISHED':
             self.window.fill(BLACK)
