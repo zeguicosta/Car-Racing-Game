@@ -17,11 +17,10 @@ def load_images():
     images['track_border'] = scale_image(pygame.image.load('imgs/border.png'), 7)
     images['finish'] = scale_image(pygame.image.load('imgs/finish2.png'), 7)
     images['red_car'] = scale_image(pygame.image.load('imgs/bluecar.png'), 1.7)
-    # images['init_screen'] = scale_image(pygame.image.load('imgs/start_screen.png'), 7)
-    # images['game_over'] = scale_image(pygame.image.load('imgs/gameover.png'), 7)
     images['dash'] = scale_image(pygame.image.load('imgs/dash.png'), 7)
     images['life'] = [scale_image(pygame.image.load(f'imgs/bolt{i}.png'), 7) for i in range(1, 6)]
 
+    # Carregando as imagens da animação de início
     animation_frames = []
     for i in range(1, 15):
         frame_path = f'imgs/start_animation{i}.png'
@@ -32,6 +31,7 @@ def load_images():
             print(f'Erro ao carregar {frame_path}: {e}')
     images['start_animation'] = animation_frames
 
+    # Carregando as imagens da animação de game over
     gameover_frames = []
     for i in range(1, 6):
         gameover_path = f'imgs/gameover{i}.png'
@@ -41,6 +41,9 @@ def load_images():
         except pygame.error as e:
             print(f'Erro ao carregar {gameover_path}: {e}')
     images['gameover_animation'] = gameover_frames
+
+    # Carregando a imagem do tutorial
+    images['tutorial'] = scale_image(pygame.image.load('imgs/tutorial.png'), 7)
 
     return images
 
@@ -58,7 +61,7 @@ class Game:
         self.dash_active = False
         self.dash_timer = 0
         self.dash_duration = 60
-        self.finish_position = (259, 350)  # Adiciona a posição de chegada
+        self.finish_position = (259, 350)  # Posição de chegada
         self.timer = 0
         self.lap = 1
         self.max_laps = 2
@@ -77,7 +80,7 @@ class Game:
         # Variáveis da animação da tela inicial
         self.animation_frames = self.images['start_animation']
         self.current_animation_frame = 0
-        self.animation_speed = 5 # Número de frames do jogo por mudança de frame da animação
+        self.animation_speed = 5  # Número de frames do jogo por mudança de frame da animação
         self.animation_counter = 0
 
         # Variáveis de animação de game over
@@ -86,6 +89,13 @@ class Game:
         self.gameover_speed = 7  # Número de frames do jogo por mudança de frame da animação de game over
         self.gameover_counter = 0
 
+        # Variáveis para o tutorial
+        self.tutorial_start_time = None
+        self.tutorial_duration = 7000  # Duração total do tutorial em milissegundos (7 segundos)
+        self.tutorial_fade_in_duration = 2000  # Duração do fade-in em milissegundos (2 segundos)
+        self.tutorial_full_opacity_duration = 3000  # Duração em opacidade total (3 segundos)
+        self.tutorial_fade_out_duration = 2000  # Duração do fade-out em milissegundos (2 segundos)
+        self.tutorial_alpha = 0  # Opacidade inicial do tutorial
 
     def init_music(self):
         pygame.mixer.music.load('sound/soundtrack.mp3')
@@ -119,7 +129,9 @@ class Game:
 
                 elif self.state == 'GET_NAME':
                     if event.key == pygame.K_RETURN and self.player_name.strip():
-                        self.state = 'PLAYING'
+                        self.state = 'TUTORIAL'
+                        self.tutorial_start_time = pygame.time.get_ticks()
+                        self.tutorial_alpha = 0  # Reinicia a opacidade
                     elif event.key == pygame.K_BACKSPACE:
                         self.player_name = self.player_name[:-1]
                     else:
@@ -128,7 +140,7 @@ class Game:
                 elif self.state in ['GAME_OVER', 'FINISHED']:
                     if event.key == pygame.K_q:
                         self.running = False
-                    elif event.key == pygame.K_r and self.state == 'GAME_OVER' or self.state == 'FINISHED':
+                    elif event.key == pygame.K_r and self.state in ['GAME_OVER', 'FINISHED']:
                         self.reset_game()
 
     def reset_game(self):
@@ -139,6 +151,8 @@ class Game:
         self.timer = 0
         self.lap = 1
         self.state = 'PLAYING'
+        self.dash_active = False
+        self.dash_timer = 0
 
     def update_game_logic(self):
         if self.state == 'PLAYING':
@@ -196,6 +210,26 @@ class Game:
                 if self.current_gameover_frame >= len(self.gameover_frames):
                     self.current_gameover_frame = 0  # Reinicia a animação (loop)
 
+        elif self.state == 'TUTORIAL':
+            # Lógica para o efeito de fade-in e fade-out
+            current_time = pygame.time.get_ticks()
+            elapsed_time = current_time - self.tutorial_start_time
+
+            if elapsed_time >= self.tutorial_duration:
+                # Fim do tutorial, iniciar o jogo
+                self.state = 'PLAYING'
+            else:
+                if elapsed_time <= self.tutorial_fade_in_duration:
+                    # Fade-in
+                    self.tutorial_alpha = int(255 * (elapsed_time / self.tutorial_fade_in_duration))
+                elif elapsed_time <= self.tutorial_fade_in_duration + self.tutorial_full_opacity_duration:
+                    # Opacidade total
+                    self.tutorial_alpha = 255
+                else:
+                    # Fade-out
+                    fade_out_elapsed = elapsed_time - (self.tutorial_fade_in_duration + self.tutorial_full_opacity_duration)
+                    self.tutorial_alpha = int(255 * (1 - (fade_out_elapsed / self.tutorial_fade_out_duration)))
+
     def render(self):
         if self.state == 'START':
             self.window.blit(self.animation_frames[self.current_animation_frame], (0, 0))
@@ -204,8 +238,14 @@ class Game:
             self.window.fill(BLACK)
             self.render_text("Digite seu nome:", 'title', WHITE, -100)
             name_surface = self.fonts['common'].render(self.player_name, True, WHITE)
-            name_rect = name_surface.get_rect(center = (self.width / 2, self.height / 2))
+            name_rect = name_surface.get_rect(center=(self.width / 2, self.height / 2))
             self.window.blit(name_surface, name_rect)
+
+        elif self.state == 'TUTORIAL':
+            # Renderizar o tutorial com efeito de fade
+            tutorial_image = self.images['tutorial'].copy()
+            tutorial_image.set_alpha(self.tutorial_alpha)
+            self.window.blit(tutorial_image, (0, 0))
 
         elif self.state == 'PLAYING':
             self.window.blit(self.images['background'], (0, 0))
