@@ -5,7 +5,7 @@ from utils import scale_image, blit_rotate_center
 
 pygame.init()
 
-# Constantes
+# Constantes (Cores)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
@@ -19,6 +19,7 @@ def load_images():
     images['red_car'] = scale_image(pygame.image.load('imgs/bluecar.png'), 1.7)
     images['dash'] = scale_image(pygame.image.load('imgs/dash.png'), 7)
     images['life'] = [scale_image(pygame.image.load(f'imgs/bolt{i}.png'), 7) for i in range(1, 6)]
+    images['tutorial'] = scale_image(pygame.image.load('imgs/tutorial.png'), 7)
 
     # Carregando as imagens da animação de início
     animation_frames = []
@@ -42,15 +43,14 @@ def load_images():
             print(f'Erro ao carregar {gameover_path}: {e}')
     images['gameover_animation'] = gameover_frames
 
-    # Carregando a imagem do tutorial
-    images['tutorial'] = scale_image(pygame.image.load('imgs/tutorial.png'), 7)
-
     return images
+
 
 class Game:
     def __init__(self):
         self.images = load_images()
-        self.setup_display()
+        self.setup_display()  # Define self.width e self.height
+
         self.clock = pygame.time.Clock()
         self.running = True
         self.state = 'START'
@@ -60,7 +60,7 @@ class Game:
         self.laps = []
         self.dash_active = False
         self.dash_timer = 0
-        self.dash_duration = 60
+        self.dash_duration = 50
         self.finish_position = (259, 350)  # Posição de chegada
         self.timer = 0
         self.lap = 1
@@ -91,15 +91,24 @@ class Game:
 
         # Variáveis para o tutorial
         self.tutorial_start_time = None
-        self.tutorial_duration = 7000  # Duração total do tutorial em milissegundos (7 segundos)
-        self.tutorial_fade_in_duration = 2000  # Duração do fade-in em milissegundos (2 segundos)
-        self.tutorial_full_opacity_duration = 3000  # Duração em opacidade total (3 segundos)
-        self.tutorial_fade_out_duration = 2000  # Duração do fade-out em milissegundos (2 segundos)
-        self.tutorial_alpha = 0  # Opacidade inicial do tutorial
+        self.tutorial_duration = 4000  # Duração total do tutorial em milissegundos (7 segundos)
+        self.tutorial_fade_in_duration = 1000  # Duração do fade-in em milissegundos (2 segundos)
+        self.tutorial_full_opacity_duration = 2000  # Duração em opacidade total (3 segundos)
+        self.tutorial_fade_out_duration = 1000  # Duração do fade-out em milissegundos (2 segundos)
+
+        # Superfície preta para fade-in e fade-out
+        self.fade_surface = pygame.Surface((self.width, self.height))
+        self.fade_surface.fill(BLACK)
+        self.fade_alpha = 255  # Inicia totalmente opaco para o fade-in
+        self.fade_surface.set_alpha(self.fade_alpha)
+
 
     def init_music(self):
-        pygame.mixer.music.load('sound/soundtrack.mp3')
-        pygame.mixer.music.play(-1)
+        try:
+            pygame.mixer.music.load('sound/soundtrack.mp3')
+            pygame.mixer.music.play(-1)
+        except pygame.error as e:
+            print(f"Erro ao carregar soundtrack.mp3: {e}")
 
     def setup_display(self):
         self.width, self.height = self.images['track'].get_width(), self.images['track'].get_height()
@@ -131,7 +140,8 @@ class Game:
                     if event.key == pygame.K_RETURN and self.player_name.strip():
                         self.state = 'TUTORIAL'
                         self.tutorial_start_time = pygame.time.get_ticks()
-                        self.tutorial_alpha = 0  # Reinicia a opacidade
+                        self.fade_alpha = 255  # Inicia totalmente opaco para o fade-in
+                        self.fade_surface.set_alpha(self.fade_alpha)
                     elif event.key == pygame.K_BACKSPACE:
                         self.player_name = self.player_name[:-1]
                     else:
@@ -153,6 +163,8 @@ class Game:
         self.state = 'PLAYING'
         self.dash_active = False
         self.dash_timer = 0
+        self.player_car.max_vel = 11
+        self.player_car.acceleration = 0.2
 
     def update_game_logic(self):
         if self.state == 'PLAYING':
@@ -169,8 +181,8 @@ class Game:
             if not self.dash_active and self.player_car.collide(self.dash_mask, 0, 0):
                 self.dash_active = True
                 self.dash_timer = 0
-                self.player_car.acceleration = 1
-                self.player_car.max_vel = 15
+                self.player_car.acceleration = 2
+                self.player_car.max_vel = 17
 
             if self.player_car.collide(self.track_border_mask, 0, 0):
                 self.player_car.bounce()
@@ -215,20 +227,25 @@ class Game:
             current_time = pygame.time.get_ticks()
             elapsed_time = current_time - self.tutorial_start_time
 
-            if elapsed_time >= self.tutorial_duration:
+            if elapsed_time <= self.tutorial_fade_in_duration:
+                # Fade-in: diminui a opacidade da superfície preta de 255 para 0
+                fade_progress = elapsed_time / self.tutorial_fade_in_duration
+                self.fade_alpha = int(255 * (1 - fade_progress))
+                self.fade_surface.set_alpha(self.fade_alpha)
+            elif elapsed_time <= self.tutorial_fade_in_duration + self.tutorial_full_opacity_duration:
+                # Opacidade total: mantém a superfície preta totalmente transparente
+                self.fade_alpha = 0
+                self.fade_surface.set_alpha(self.fade_alpha)
+            elif elapsed_time <= self.tutorial_duration:
+                # Fade-out: aumenta a opacidade da superfície preta de 0 para 255
+                fade_out_elapsed = elapsed_time - (self.tutorial_fade_in_duration + self.tutorial_full_opacity_duration)
+                fade_progress = fade_out_elapsed / self.tutorial_fade_out_duration
+                fade_progress = min(fade_progress, 1)  # Garante que não ultrapasse 1
+                self.fade_alpha = int(255 * fade_progress)
+                self.fade_surface.set_alpha(self.fade_alpha)
+            else:
                 # Fim do tutorial, iniciar o jogo
                 self.state = 'PLAYING'
-            else:
-                if elapsed_time <= self.tutorial_fade_in_duration:
-                    # Fade-in
-                    self.tutorial_alpha = int(255 * (elapsed_time / self.tutorial_fade_in_duration))
-                elif elapsed_time <= self.tutorial_fade_in_duration + self.tutorial_full_opacity_duration:
-                    # Opacidade total
-                    self.tutorial_alpha = 255
-                else:
-                    # Fade-out
-                    fade_out_elapsed = elapsed_time - (self.tutorial_fade_in_duration + self.tutorial_full_opacity_duration)
-                    self.tutorial_alpha = int(255 * (1 - (fade_out_elapsed / self.tutorial_fade_out_duration)))
 
     def render(self):
         if self.state == 'START':
@@ -242,10 +259,14 @@ class Game:
             self.window.blit(name_surface, name_rect)
 
         elif self.state == 'TUTORIAL':
-            # Renderizar o tutorial com efeito de fade
-            tutorial_image = self.images['tutorial'].copy()
-            tutorial_image.set_alpha(self.tutorial_alpha)
-            self.window.blit(tutorial_image, (0, 0))
+            # Renderizar a imagem do tutorial
+            if self.images['tutorial']:
+                self.window.blit(self.images['tutorial'], (0, 0))
+                # Renderizar a superfície preta para o fade-in e fade-out
+                self.window.blit(self.fade_surface, (0, 0))
+            else:
+                self.window.fill(BLACK)
+                self.render_text("Tutorial não encontrado.", 'common', WHITE, 0)
 
         elif self.state == 'PLAYING':
             self.window.blit(self.images['background'], (0, 0))
@@ -263,8 +284,7 @@ class Game:
                 self.window.blit(overlay, (0, 0))
 
         elif self.state == 'GAME_OVER':
-            # Exibir o frame atual da animação de game over
-            if self.gameover_frames:  # Verifica se a lista não está vazia
+            if self.gameover_frames:
                 self.window.blit(self.gameover_frames[self.current_gameover_frame], (0, 0))
 
         elif self.state == 'FINISHED':
