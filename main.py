@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+import json
 from utils import scale_image, blit_rotate_center
 
 pygame.init()
@@ -71,6 +72,8 @@ class Game:
             'title': pygame.font.Font('fonts/PixelifySans-Bold.ttf', 120),
             'common': pygame.font.Font('fonts/PixelifySans-Medium.ttf', 65)
         }
+
+        self.data_saved = False
         
         # Reintegrando as máscaras de colisão
         self.track_border_mask = pygame.mask.from_surface(self.images['track_border'])
@@ -203,6 +206,7 @@ class Game:
                     self.lap += 1
                     if self.lap > self.max_laps:
                         self.state = 'FINISHED'
+                        self.save_player_data() # Salva os dados ao completar as voltas
 
         elif self.state == 'START':
             # Atualizar a animação da tela inicial
@@ -305,6 +309,39 @@ class Game:
                 self.render_text(f'Volta {i}: {lap_time:.2f}s', 'common', WHITE, (-70 * i))
             best_lap = min(laps)
             self.render_text(f'Melhor Volta: {best_lap:.2f}s', 'common', WHITE, (70 * (len(laps) + 1)))
+
+    def save_player_data(self):
+        if not self.data_saved:
+            player_data = {
+                'player_name': self.player_name,
+                'laps': [round(lap, 2) for lap in self.laps], # Formata os tempos das voltas
+                'best_lap': round(min(self.laps), 2) if self.laps else None,
+                'total_time': round(sum(self.laps), 2) if self.laps else 0
+            }
+
+            try:
+                # Tenta abrir o arquivo existente para carregar os dados
+                with open('players_data.json', 'r', encoding='utf-8') as archive:
+                    data = json.load(archive)
+            except FileNotFoundError:
+                # Se o arquivo não existir, inicia uma lista vazia
+                data = []
+            except json.JSONDecodeError:
+                # Se o arquivo estiver corrompido, inicia uma lista vazia
+                data = []
+
+            # Adiciona os dados do jogador atual
+            data.append(player_data)
+
+            try:
+                # Salva os dados atualizados de volta no arquivo json
+                with open('players_data.json', 'w') as archive:
+                    json.dump(data, archive, ensure_ascii=False, indent=4)
+                print('Dados do jogador salvos com sucesso!')
+                self.data_saved = True
+            except Exception as e:
+                print(f'Erro ao salvar dados do jogador: {e}')
+
 
 class PlayerCar:
     def __init__(self, image, start_pos):

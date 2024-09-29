@@ -1,0 +1,20 @@
+[
+    {
+        "player_name": "zé gui",
+        "laps": [
+            7.75,
+            8.33
+        ],
+        "best_lap": 7.75,
+        "total_time": 16.08
+    },
+    {
+        "player_name": "zé gui",
+        "laps": [
+            7.73,
+            7.62
+        ],
+        "best_lap": 7.62,
+        "total_time": 15.35
+    }
+]
