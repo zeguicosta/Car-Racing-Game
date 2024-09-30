@@ -9,7 +9,16 @@
 
 ## Descrição do Projeto
 
-O "FORMULA E SIMULATOR" é um jogo de corrida em Python utilizando a biblioteca Pygame. O jogo simula uma corrida de Fórmula E onde o jogador controla um carro, devendo percorrer o circuito no menor tempo possível, desviando de obstáculos e completando voltas.
+O "FORMULA E SIMULATOR" é um jogo de corrida em Python utilizando a biblioteca Pygame. O jogo simula uma corrida de Fórmula E, onde o jogador controla um carro, devendo percorrer o circuito no menor tempo possível, desviando de obstáculos e completando voltas.
+
+## Funcionalidades
+
+- **Movimentação do Carro**: Controle completo sobre aceleração, desaceleração e rotação do carro.
+- **Animações**: Animações de início e de game over para uma experiência mais imersiva.
+- **Sistema de Dashes**: Permite ao jogador acelerar temporariamente ao passar por zonas específicas.
+- **Sistema de Vidas**: O jogador começa com 5 vidas, perdendo uma ao colidir com as bordas da pista.
+- **Sistema de Voltas**: O tempo de cada volta é registrado, e o melhor tempo é exibido ao final do jogo.
+- **Música e Sons**: Música de fundo e efeitos sonoros durante o jogo.
 
 ## Instruções de Uso
 
@@ -17,14 +26,18 @@ O "FORMULA E SIMULATOR" é um jogo de corrida em Python utilizando a biblioteca 
 
 1. Certifique-se de ter o Python instalado em sua máquina.
 2. Instale a biblioteca Pygame utilizando o comando:
-    
-    `pip install pygame`
-    
+
+    ```bash
+    pip install pygame
+    ```
+
 3. Coloque todas as imagens na pasta `imgs` dentro do diretório do projeto.
 4. Execute o arquivo principal do jogo:
-    
-    `python main.py`
-    
+
+    ```bash
+    python main.py
+    ```
+
 5. Digite seu nome quando solicitado e controle o carro utilizando as seguintes teclas:
     - `W` para mover para frente
     - `S` para mover para trás
@@ -37,6 +50,8 @@ O "FORMULA E SIMULATOR" é um jogo de corrida em Python utilizando a biblioteca 
 - `S` - Ré
 - `A` - Girar para a esquerda
 - `D` - Girar para a direita
+- `Q` - Sair do jogo na tela de Game Over ou Finalizado
+- `R` - Reiniciar o jogo na tela de Game Over ou Finalizado
 
 ### Objetivo do Jogo
 
@@ -53,16 +68,17 @@ Complete o maior número de voltas no menor tempo possível. O tempo de cada vol
 
 ## Estrutura do Projeto
 
-```
-├── imgs/
-│   ├── bg.png 
-│   ├── track2.png 
-│   ├── border2.png 
-│   ├── finish2.png 
-│   ├── racecar.png 
-│   └── green-car.png 
-├── utils.py 
-└── main.py
+```bash
+├── __pycache__/            # Arquivos compilados automaticamente pelo Python
+├── fonts/                  # Fonte utilizada no jogo
+│   ├── PixelifySans-Bold.ttf
+│   └── PixelifySans-Medium.ttf
+├── imgs/                   # Contém todas as imagens do jogo (carros, pista, etc.)
+├── sound/                  # Música de fundo do jogo
+├── README.md               # Este arquivo
+├── main.py                 # Arquivo principal contendo o código do jogo
+├── players_data.json       # Arquivo de dados dos jogadores
+└── utils.py                # Arquivo com funções auxiliares (ex: scale_image, blit_rotate_center)
 ```
 
 ## Detalhes Técnicos
@@ -75,18 +91,23 @@ Arquivo principal do jogo. Contém a lógica do jogo, controle do carro, renderi
 
 Arquivo utilitário contendo funções auxiliares para manipulação de imagens e renderização.
 
-## Funcionalidades
+### Funcionalidades
 
 - **Carregamento de Imagens**: Carrega e escala as imagens utilizadas no jogo.
 - **Criação da Janela do Jogo**: Define o tamanho da janela com base nas dimensões da pista.
-- **Controle do Carro**: Classe `AbstractCar` controla a movimentação e colisão dos carros. Classe `PlayerCar` especializa o comportamento do carro controlado pelo jogador.
+- **Controle do Carro**: Classe `PlayerCar` controla a movimentação e colisão do carro do jogador.
 - **Renderização**: Função `render` exibe as imagens na tela.
-- **Movimentação do Jogador**: Função `move_player` controla a movimentação do carro do jogador com base nas teclas pressionadas.
-- **Verificação de Colisões**: Função `collide` verifica colisões entre o carro e os obstáculos.
+- **Movimentação do Jogador**: A função `move` controla a movimentação do carro do jogador com base nas teclas pressionadas.
+- **Verificação de Colisões**: A função `collide` verifica colisões entre o carro e os obstáculos na pista.
 - **Sistema de Voltas**: Registra o tempo de cada volta e exibe o melhor tempo ao final.
-- **Redefinição de imagem**: Função `scale_image` redefine o tamanho da imagem multiplicando por um fator.
-- **Rotação de imagem**: Função `blit_rotate_center` rotaciona a imagem pelo centro e exibe na tela.
+- **Animações**: Inclui animações para a tela inicial e para a tela de game over.
+- **Redefinição de imagem**: A função `scale_image` redefine o tamanho da imagem multiplicando por um fator.
+- **Rotação de imagem**: A função `blit_rotate_center` rotaciona a imagem pelo centro e exibe na tela.
 
 ## Informações Adicionais
 
-O projeto até agora é um jogo simples que permite ao jogador controlar um carro em uma pista de corrida, registrando o tempo de cada volta. O jogo ainda se apresenta na fase inicial, não possuindo todas as funcionalidades finais, como competição com bots, multiplayer e habilidades como Attack Mode, refletindo a competição da Fórmula E. É uma ótima oportunidade para aprender as regras e conceitos da Fórmula E, de uma maneira fluída e intuitiva.
+O projeto é um jogo simples que permite ao jogador controlar um carro em uma pista de corrida, registrando o tempo de cada volta. O jogo ainda está em fase inicial, sem todas as funcionalidades finais, como competição com bots ou multiplayer. É uma ótima maneira de aprender as regras e conceitos da Fórmula E de forma interativa e divertida.
+
+---
+
+**Aproveite o jogo e tente bater o seu recorde!**
