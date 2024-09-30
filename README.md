@@ -50,6 +50,7 @@ O "FORMULA E SIMULATOR" é um jogo de corrida em Python utilizando a biblioteca 
 - `S` - Ré
 - `A` - Girar para a esquerda
 - `D` - Girar para a direita
+- `I` - Iniciar o jogo na tela de Início
 - `Q` - Sair do jogo na tela de Game Over ou Finalizado
 - `R` - Reiniciar o jogo na tela de Game Over ou Finalizado
 
@@ -69,7 +70,6 @@ Complete o maior número de voltas no menor tempo possível. O tempo de cada vol
 ## Estrutura do Projeto
 
 ```bash
-├── __pycache__/            # Arquivos compilados automaticamente pelo Python
 ├── fonts/                  # Fonte utilizada no jogo
 │   ├── PixelifySans-Bold.ttf
 │   └── PixelifySans-Medium.ttf
