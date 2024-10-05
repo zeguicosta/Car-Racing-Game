@@ -45,6 +45,17 @@ def load_images():
             print(f'Erro ao carregar {gameover_path}: {e}')
     images['gameover_animation'] = gameover_frames
 
+    # Carregando as imagens da animação de SpeedPoints
+    speedpoints_frames = []
+    for i in range(1, 6):
+        speedpoints_path = f'imgs/sp{i}.png'
+        try:
+            speedpoints_image = scale_image(pygame.image.load(speedpoints_path), 7)
+            speedpoints_frames.append(speedpoints_image)
+        except pygame.error as e:
+            print(f'Erro ao carregar {speedpoints_path}: {e}')
+    images['speedpoints_animation'] = speedpoints_frames
+
     return images
 
 
