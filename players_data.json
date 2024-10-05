@@ -19,5 +19,29 @@
                 "total_time": 15.18
             }
         ]
+    },
+    "3eb651d5-27df-40a9-b9fb-13a44874ac6f": {
+        "player_name": "Zé Gui",
+        "total_speedpoints": 650,
+        "races": [
+            {
+                "laps": [
+                    7.75,
+                    8.1
+                ],
+                "best_lap": 7.75,
+                "total_time": 15.85,
+                "speedpoints": 500
+            },
+            {
+                "laps": [
+                    8.13,
+                    11.25
+                ],
+                "best_lap": 8.13,
+                "total_time": 19.38,
+                "speedpoints": 150
+            }
+        ]
     }
 }

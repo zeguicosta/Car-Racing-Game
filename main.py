@@ -312,13 +312,30 @@ class Game:
             best_lap = min(laps)
             self.render_text(f'Melhor Volta: {best_lap:.2f}s', 'common', WHITE, (70 * (len(laps) + 1)))
 
+    def calculate_speedpoints(self, total_time):
+        """
+            Calcula os speedpoints com base no tempo total da corrida.
+        """
+        if total_time <= 16:
+            return 500
+        elif total_time <= 19:
+            return 300
+        elif total_time <= 22:
+            return 150
+        elif total_time <= 25:
+            return 50
+        else:
+            return 10
+
     def save_player_data(self):
         if not self.data_saved:
             # Dados da corrida atual
+            total_time = round(sum(self.laps), 2) if self.laps else 0
             race_data = {
                 'laps': [round(lap, 2) for lap in self.laps], # Formata os tempos das voltas
                 'best_lap': round(min(self.laps), 2) if self.laps else None,
-                'total_time': round(sum(self.laps), 2) if self.laps else 0
+                'total_time': total_time,
+                'speedpoints': self.calculate_speedpoints(total_time)
             }
 
             try:
@@ -340,6 +357,8 @@ class Game:
             if player_id != None:
                 # Adiciona a corrida à lista de corridas do jogador existente
                 data[player_id]['races'].append(race_data)
+                # Atualiza os speedpoints totais
+                data[player_id]['total_speedpoints'] += race_data['speedpoints']
                 print(f'Corrida adicionada ao ID de jogador: {player_id}.')
             else:
                 # Gera um novo ID único para o jogador
@@ -347,6 +366,7 @@ class Game:
                 # Adiciona ao ID, o nome e a corrida atual do jogador
                 data[player_id] = {
                     'player_name': self.player_name,
+                    'total_speedpoints': race_data['speedpoints'], # Inicializa com os speedpoints da primeira corrida
                     'races': [race_data]
                 }
                 print(f'Novo jogador registrado com ID: {player_id}.')
