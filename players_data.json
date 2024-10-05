@@ -1,20 +1,23 @@
-[
-    {
-        "player_name": "zé gui",
-        "laps": [
-            7.75,
-            8.33
-        ],
-        "best_lap": 7.75,
-        "total_time": 16.08
-    },
-    {
-        "player_name": "zé gui",
-        "laps": [
-            7.73,
-            7.62
-        ],
-        "best_lap": 7.62,
-        "total_time": 15.35
+{
+    "0eb50ee2-55eb-48f7-b167-b746be15fe9f": {
+        "player_name": "zégui",
+        "races": [
+            {
+                "laps": [
+                    7.67,
+                    7.43
+                ],
+                "best_lap": 7.43,
+                "total_time": 15.1
+            },
+            {
+                "laps": [
+                    7.58,
+                    7.6
+                ],
+                "best_lap": 7.58,
+                "total_time": 15.18
+            }
+        ]
     }
-]
+}

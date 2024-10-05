@@ -2,6 +2,7 @@ import pygame
 import sys
 import math
 import json
+import uuid
 from utils import scale_image, blit_rotate_center
 
 pygame.init()
@@ -168,6 +169,7 @@ class Game:
         self.dash_timer = 0
         self.player_car.max_vel = 11
         self.player_car.acceleration = 0.2
+        self.data_saved = False  # Resetar a flag para permitir salvar novamente
 
     def update_game_logic(self):
         if self.state == 'PLAYING':
@@ -312,8 +314,8 @@ class Game:
 
     def save_player_data(self):
         if not self.data_saved:
-            player_data = {
-                'player_name': self.player_name,
+            # Dados da corrida atual
+            race_data = {
                 'laps': [round(lap, 2) for lap in self.laps], # Formata os tempos das voltas
                 'best_lap': round(min(self.laps), 2) if self.laps else None,
                 'total_time': round(sum(self.laps), 2) if self.laps else 0
@@ -323,19 +325,35 @@ class Game:
                 # Tenta abrir o arquivo existente para carregar os dados
                 with open('players_data.json', 'r', encoding='utf-8') as archive:
                     data = json.load(archive)
-            except FileNotFoundError:
+            except (FileNotFoundError, json.JSONDecodeError):
                 # Se o arquivo não existir, inicia uma lista vazia
-                data = []
-            except json.JSONDecodeError:
-                # Se o arquivo estiver corrompido, inicia uma lista vazia
-                data = []
+                data = {}
 
-            # Adiciona os dados do jogador atual
-            data.append(player_data)
+
+            # Verifica se o jogador já está registrado
+            player_id = None
+            for pid, player in data.items():
+                if player['player_name'].lower() == self.player_name.lower():
+                    player_id = pid
+                    break # Interrompe a busca pelo jogador
+
+            if player_id != None:
+                # Adiciona a corrida à lista de corridas do jogador existente
+                data[player_id]['races'].append(race_data)
+                print(f'Corrida adicionada ao ID de jogador: {player_id}.')
+            else:
+                # Gera um novo ID único para o jogador
+                player_id = str(uuid.uuid4())
+                # Adiciona ao ID, o nome e a corrida atual do jogador
+                data[player_id] = {
+                    'player_name': self.player_name,
+                    'races': [race_data]
+                }
+                print(f'Novo jogador registrado com ID: {player_id}.')
 
             try:
                 # Salva os dados atualizados de volta no arquivo json
-                with open('players_data.json', 'w') as archive:
+                with open('players_data.json', 'w', encoding='utf-8') as archive:
                     json.dump(data, archive, ensure_ascii=False, indent=4)
                 print('Dados do jogador salvos com sucesso!')
                 self.data_saved = True
