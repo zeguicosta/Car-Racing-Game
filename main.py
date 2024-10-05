@@ -79,6 +79,7 @@ class Game:
         self.lap = 1
         self.max_laps = 2
         self.current_life_image = self.images['life'][0]
+        self.speedpoints_earned = 0  # Inicializa com 0
         self.init_music()
         self.fonts = {
             'title': pygame.font.Font('fonts/PixelifySans-Bold.ttf', 120),
@@ -103,6 +104,15 @@ class Game:
         self.current_gameover_frame = 0
         self.gameover_speed = 7  # Número de frames do jogo por mudança de frame da animação de game over
         self.gameover_counter = 0
+
+        # Variáveis de animação de speedpoints
+        self.speedpoints_frames = self.images['speedpoints_animation']
+        self.speedpoints_to_show = []  # Lista de frames a serem exibidos
+        self.current_speedpoints_frame = 0
+        self.speedpoints_speed =10  # Número de frames do jogo por mudança de frame da animação de game over
+        self.speedpoints_counter = 0
+        self.speedpoints_wait_timer = 0  # Contador para aguardar 3 segundos após a animação
+        self.speedpoints_display_duration = 180  # 3 segundos a 60 FPS
 
         # Variáveis para o tutorial
         self.tutorial_start_time = None
@@ -218,8 +228,9 @@ class Game:
                     self.timer = 0
                     self.lap += 1
                     if self.lap > self.max_laps:
-                        self.state = 'FINISHED'
                         self.save_player_data() # Salva os dados ao completar as voltas
+                        self.setup_speedpoints_animation()
+                        self.state = 'SPEEDPOINTS'
 
         elif self.state == 'START':
             # Atualizar a animação da tela inicial
@@ -229,6 +240,18 @@ class Game:
                 self.current_animation_frame += 1
                 if self.current_animation_frame >= len(self.animation_frames):
                     self.current_animation_frame = 0  # Reinicia a animação (loop)
+
+        elif self.state == 'SPEEDPOINTS':
+            if self.current_speedpoints_frame < len(self.speedpoints_to_show):
+                self.speedpoints_counter += 1
+                if self.speedpoints_counter >= self.speedpoints_speed:
+                    self.speedpoints_counter = 0
+                    self.current_speedpoints_frame += 1
+            else:
+                # Inicia o contador de espera de 3 segundos após a animação
+                self.speedpoints_wait_timer += 1
+                if self.speedpoints_wait_timer >= self.speedpoints_display_duration:
+                    self.state = 'FINISHED'  # Muda para a tela de Finished
 
         elif self.state == 'GAME_OVER':
             # Atualizar a animação de game over
@@ -304,6 +327,12 @@ class Game:
             if self.gameover_frames:
                 self.window.blit(self.gameover_frames[self.current_gameover_frame], (0, 0))
 
+        elif self.state == 'SPEEDPOINTS':
+            if self.current_speedpoints_frame < len(self.speedpoints_to_show):
+                current_frame_image = self.speedpoints_to_show[self.current_speedpoints_frame]
+                frame_rect = current_frame_image.get_rect(center=(self.width / 2, self.height / 2))
+                self.window.blit(current_frame_image, frame_rect)
+
         elif self.state == 'FINISHED':
             self.window.fill(BLACK)
             self.render_info(self.player_name, self.laps, self.fonts['common'])
@@ -338,10 +367,28 @@ class Game:
         else:
             return 10
 
+    def setup_speedpoints_animation(self):
+        if self.speedpoints_earned >= 500:
+            self.speedpoints_to_show = self.speedpoints_frames[:5]
+        elif self.speedpoints_earned >= 300:
+            self.speedpoints_to_show = self.speedpoints_frames[:4]
+        elif self.speedpoints_earned >= 150:
+            self.speedpoints_to_show = self.speedpoints_frames[:3]
+        elif self.speedpoints_earned >= 50:
+            self.speedpoints_to_show = self.speedpoints_frames[:2]
+        else:
+            self.speedpoints_to_show = self.speedpoints_frames[:1]
+
+        self.current_speedpoints_frame = 0
+        self.speedpoints_counter = 0
+        self.speedpoints_wait_timer = 0
+
     def save_player_data(self):
         if not self.data_saved:
             # Dados da corrida atual
             total_time = round(sum(self.laps), 2) if self.laps else 0
+            speedpoints_earned = self.calculate_speedpoints(total_time)
+
             race_data = {
                 'laps': [round(lap, 2) for lap in self.laps], # Formata os tempos das voltas
                 'best_lap': round(min(self.laps), 2) if self.laps else None,
@@ -387,6 +434,10 @@ class Game:
                 with open('players_data.json', 'w', encoding='utf-8') as archive:
                     json.dump(data, archive, ensure_ascii=False, indent=4)
                 print('Dados do jogador salvos com sucesso!')
+
+                # Armazena os SpeedPoints ganhos para a animação
+                self.speedpoints_earned = speedpoints_earned
+
                 self.data_saved = True
             except Exception as e:
                 print(f'Erro ao salvar dados do jogador: {e}')
