@@ -1,0 +1,41 @@
+{
+    "df2824a3-1600-48a8-ab40-c05c1add1e11": {
+        "player_name": "Zé Gui",
+        "total_speedpoints": 800,
+        "races": [
+            {
+                "laps": [
+                    7.38,
+                    7.42
+                ],
+                "best_lap": 7.38,
+                "total_time": 14.8,
+                "speedpoints": 500
+            },
+            {
+                "laps": [
+                    8.68,
+                    7.55
+                ],
+                "best_lap": 7.55,
+                "total_time": 16.23,
+                "speedpoints": 300
+            }
+        ]
+    },
+    "5ef7f9c8-546e-4044-8ed0-2d43afec9206": {
+        "player_name": "Matheus",
+        "total_speedpoints": 500,
+        "races": [
+            {
+                "laps": [
+                    7.8,
+                    7.4
+                ],
+                "best_lap": 7.4,
+                "total_time": 15.2,
+                "speedpoints": 500
+            }
+        ]
+    }
+}
