@@ -37,5 +37,83 @@
                 "speedpoints": 500
             }
         ]
+    },
+    "2b51c8ab-1e77-4a8f-a6f2-6b0d843b86b4": {
+        "player_name": "Yuri Lopes",
+        "total_speedpoints": 900,
+        "races": [
+            {
+                "laps": [
+                    7.3,
+                    7.1
+                ],
+                "best_lap": 7.1,
+                "total_time": 14.4,
+                "speedpoints": 600
+            },
+            {
+                "laps": [
+                    8.0,
+                    7.6
+                ],
+                "best_lap": 7.6,
+                "total_time": 15.6,
+                "speedpoints": 300
+            }
+        ]
+    },
+    "4f9c8b8d-7e5d-4a0e-b26c-3c5b4fef2361": {
+        "player_name": "Henrique Botti",
+        "total_speedpoints": 750,
+        "races": [
+            {
+                "laps": [
+                    7.5,
+                    7.2
+                ],
+                "best_lap": 7.2,
+                "total_time": 14.7,
+                "speedpoints": 400
+            },
+            {
+                "laps": [
+                    8.1,
+                    7.7
+                ],
+                "best_lap": 7.7,
+                "total_time": 15.8,
+                "speedpoints": 350
+            }
+        ]
+    },
+    "1a72fcb1-3f9e-476f-928b-77d923a91f67": {
+        "player_name": "Fernando Navajas",
+        "total_speedpoints": 600,
+        "races": [
+            {
+                "laps": [
+                    7.9,
+                    7.6
+                ],
+                "best_lap": 7.6,
+                "total_time": 15.5,
+                "speedpoints": 600
+            }
+        ]
+    },
+    "6c91340f-349b-4707-a6f5-58092454c77f": {
+        "player_name": "Cidade",
+        "total_speedpoints": 650,
+        "races": [
+            {
+                "laps": [
+                    8.2,
+                    7.8
+                ],
+                "best_lap": 7.8,
+                "total_time": 16.0,
+                "speedpoints": 650
+            }
+        ]
     }
 }
