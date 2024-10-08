@@ -1,7 +1,7 @@
 {
     "df2824a3-1600-48a8-ab40-c05c1add1e11": {
         "player_name": "Zé Gui",
-        "total_speedpoints": 800,
+        "total_speedpoints": 1100,
         "races": [
             {
                 "laps": [
@@ -14,11 +14,11 @@
             },
             {
                 "laps": [
-                    8.68,
-                    7.55
+                    7.78,
+                    8.38
                 ],
-                "best_lap": 7.55,
-                "total_time": 16.23,
+                "best_lap": 7.78,
+                "total_time": 16.17,
                 "speedpoints": 300
             }
         ]
